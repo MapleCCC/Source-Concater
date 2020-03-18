@@ -1,11 +1,21 @@
 import argparse
-import re
 import os
-from typing import *
+import re
 from pprint import PrettyPrinter
+from typing import *
+
 from graph import *
 
-# print = PrettyPrinter().pprint
+# TODO: add cli option to remove multiple-inclusion guard
+# TODO: add cli argument to specify output filepath
+
+print = PrettyPrinter().pprint
+
+
+def get_file_content(filepath: str) -> str:
+    with open(filepath, "r", encoding="utf-8") as f:
+        return f.read()
+
 
 # Naive and simple path join utility.
 # Further revision is required to enhance portability and robustness.
@@ -16,12 +26,15 @@ def join_path(*paths) -> str:
 # TODO: relax the regex
 # TODO: Take care of the unlikely case when standard lib is surrounded by "" instead of <> in the #include directive.
 # TODO: take care of any corner/edge cases that we could think of.
-INCLUDE_PATTERN = r"#include \"(.*\.h)\""
+INCLUDE_NON_STD_LIB_PATTERN = r"#include \"(.*\.h)\""
+INCLUDE_STD_LIB_PATTERN = r"#include <(.*\.h)>"
 
 
 def extract_dependencies_of_file(filepath: str) -> Set[str]:
     content = get_file_content(filepath)
-    matches = (re.fullmatch(INCLUDE_PATTERN, line) for line in content.splitlines())
+    matches = (
+        re.match(INCLUDE_NON_STD_LIB_PATTERN, line) for line in content.splitlines()
+    )
     return set(
         # WARNING: On Windows, os.sep is '\\' (ie, a backslash character).
         # But the header file path in C file's #include directive uses '/' most of time.
@@ -62,11 +75,6 @@ def generate_graph(entry: str) -> Graph:
     return graph
 
 
-def get_file_content(filepath: str) -> str:
-    with open(filepath, "r", encoding="utf-8") as f:
-        return f.read()
-
-
 # TODO: further revision is needed to add robustness to the search
 # Heuristic search
 # Return None is no corresponding implementation file is found
@@ -79,10 +87,24 @@ def get_implem_from_header(filepath: str) -> Optional[str]:
     return None
 
 
-def remove_include_directive(file: str) -> str:
+def remove_include_non_std_lib_directive(content: str) -> str:
     return "\n".join(
-        line for line in file.splitlines() if not re.fullmatch(INCLUDE_PATTERN, line)
+        line
+        for line in content.splitlines()
+        if not re.match(INCLUDE_NON_STD_LIB_PATTERN, line)
     )
+
+
+def move_include_std_lib_directive_to_top(content: str) -> str:
+    lines = content.splitlines()
+    includes = set()
+    body = []
+    for line in lines:
+        if re.match(INCLUDE_STD_LIB_PATTERN, line):
+            includes.add(line)
+        else:
+            body.append(line)
+    return "\n".join(sorted(list(includes)) + [""] + body)
 
 
 def main():
@@ -101,11 +123,13 @@ def main():
     inv = graph.get_invert_graph()
     topo_sorted = list(inv.topological_sort())
     headers = topo_sorted[:-1]
-    implems = list(filter(None, map(get_implem_from_header, headers[::-1])))
-    concated = headers + [entry] + implems  # type: ignore
+    implems = list(filter(None, map(get_implem_from_header, headers)))
+    concated = headers + [entry] + implems[::-1]  # type: ignore
 
     # insert blank line between headers
-    output = "\n\n".join(map(remove_include_directive, map(get_file_content, concated)))
+    output = "\n".join(map(get_file_content, concated))
+    output = remove_include_non_std_lib_directive(output)
+    output = move_include_std_lib_directive_to_top(output)
 
     with open("concated.c", "w", encoding="utf-8") as f:
         f.write(output)
