@@ -1,6 +1,8 @@
 from typing import *
 from collections import defaultdict
 
+# TODO: generalize Node data type, so that it can contain generic types of data
+# Currently we only support string node type.
 
 Node = str
 Edge = Tuple[Node, Node]
@@ -20,6 +22,8 @@ class Graph:
 
     def add_edge(self, edge: Edge) -> None:
         v, w = edge
+        if not isinstance(v, str) or not isinstance(w, str):
+            raise NotImplementedError
         self._adjacency_list[v].add(w)
 
     def has_node(self, node: Node) -> bool:
