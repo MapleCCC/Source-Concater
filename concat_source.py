@@ -16,21 +16,29 @@ def join_path(*paths) -> str:
 # TODO: relax the regex
 # TODO: Take care of the unlikely case when standard lib is surrounded by "" instead of <> in the #include directive.
 # TODO: take care of any corner/edge cases that we could think of.
-INCLUDE_PATTERN = r"#include \"(.*\.h)\"\n"
+INCLUDE_PATTERN = r"#include \"(.*\.h)\""
 
 
-def extract_dependencies(filepath: str) -> Set[str]:
-    with open(filepath, "r", encoding="utf-8") as f:
-        matches = (re.fullmatch(INCLUDE_PATTERN, line) for line in f.readlines())
-        return set(
-            # WARNING: On Windows, os.sep is '\\' (ie, a backslash character).
-            # But the header file path in C file's #include directive uses '/' most of time.
-            # We should not use os.path.join to do the path join job if we want portability.
-            # os.path.join(os.path.dirname(filepath), match.group(1))
-            join_path(os.path.dirname(filepath), match.group(1))
-            for match in matches
-            if match
-        )
+def extract_dependencies_of_file(filepath: str) -> Set[str]:
+    content = get_file_content(filepath)
+    matches = (re.fullmatch(INCLUDE_PATTERN, line) for line in content.splitlines())
+    return set(
+        # WARNING: On Windows, os.sep is '\\' (ie, a backslash character).
+        # But the header file path in C file's #include directive uses '/' most of time.
+        # We should not use os.path.join to do the path join job if we want portability.
+        # os.path.join(os.path.dirname(filepath), match.group(1))
+        join_path(os.path.dirname(filepath), match.group(1))
+        for match in matches
+        if match
+    )
+
+
+def get_dependencies_of_library(filepath: str) -> Set[str]:
+    deps = extract_dependencies_of_file(filepath)
+    implem = get_implem_from_header(filepath)
+    if implem:
+        deps |= extract_dependencies_of_file(implem) - {filepath}
+    return deps
 
 
 # TODO: implement in more sane way. Use queue.
@@ -42,7 +50,10 @@ def generate_graph(entry: str) -> Graph:
         newlist = set()
         for elem in waitlist:
             if not graph.has_node(elem):
-                deps = extract_dependencies(elem)
+                if elem.endswith(".h"):
+                    deps = get_dependencies_of_library(elem)
+                else:
+                    deps = extract_dependencies_of_file(elem)
                 for dep in deps:
                     graph.add_edge((elem, dep))
                     if not graph.has_node(dep):
@@ -69,10 +80,8 @@ def get_implem_from_header(filepath: str) -> Optional[str]:
 
 
 def remove_include_directive(file: str) -> str:
-    return "".join(
-        line
-        for line in file.splitlines(keepends=True)
-        if not re.fullmatch(INCLUDE_PATTERN, line)
+    return "\n".join(
+        line for line in file.splitlines() if not re.fullmatch(INCLUDE_PATTERN, line)
     )
 
 
@@ -96,7 +105,7 @@ def main():
     concated = headers + [entry] + implems  # type: ignore
 
     # insert blank line between headers
-    output = "\n".join(map(remove_include_directive, map(get_file_content, concated)))
+    output = "\n\n".join(map(remove_include_directive, map(get_file_content, concated)))
 
     with open("concated.c", "w", encoding="utf-8") as f:
         f.write(output)
