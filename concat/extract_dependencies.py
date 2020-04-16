@@ -1,11 +1,10 @@
 import os
 import re
-from typing import Set, List, Optional
+from typing import List, Optional, Set
 
-from .process_c_source import remove_comments, dummify_string_literals
-from .utils import get_file_content, join_path, filebasename_without_ext
-from .extra_itertools import filtertrue
 from .constants import INCLUDE_NON_STD_LIB_PATTERN
+from .process_c_source import dummify_string_literals, remove_comments
+from .utils import filebasename_without_ext, get_file_content, join_path
 
 
 def seek_file(relative_path: str, possible_dir: List[str]) -> Optional[str]:

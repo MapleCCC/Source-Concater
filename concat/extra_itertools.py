@@ -1,5 +1,5 @@
 from itertools import filterfalse
-from typing import Iterable, Optional, Callable
+from typing import Callable, Iterable, Optional
 
 __all__ = ["filtertrue"]
 

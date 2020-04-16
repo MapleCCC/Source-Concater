@@ -1,5 +1,5 @@
 from collections import defaultdict, deque
-from typing import Optional, Set, List, Dict, Tuple, Iterator
+from typing import Dict, Iterator, List, Optional, Set, Tuple
 
 # TODO: generalize Node data type, so that it can contain generic types of data
 # Currently we only support str as node type.

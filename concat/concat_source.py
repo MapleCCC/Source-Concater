@@ -5,14 +5,14 @@ import subprocess
 from pprint import PrettyPrinter
 from typing import List
 
+from .extra_itertools import filtertrue
 from .extract_dependencies import get_dependencies_of_library, get_implem_from_header
-from .graph import Graph, CircularDependencyError
-from .utils import get_file_content, write_file_content, filebasename_without_ext
+from .graph import CircularDependencyError, Graph
 from .process_c_source import (
     move_include_std_lib_directive_to_top,
     remove_include_non_std_lib_directive,
 )
-from .extra_itertools import filtertrue
+from .utils import filebasename_without_ext, get_file_content, write_file_content
 
 print = PrettyPrinter().pprint
 
