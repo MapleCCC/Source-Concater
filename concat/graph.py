@@ -21,15 +21,18 @@ class Graph:
 
     __slots__ = "_adjacency_list"
 
-    def add_edge(self, edge: Edge) -> None:
-        v, w = edge
+    def add_edge(self, v: Node, w: Node) -> None:
         if not isinstance(v, str) or not isinstance(w, str):
             raise NotImplementedError
+        if v == w:
+            raise CircularDependencyError("Self-pointing dependency is not accepted")
         self._adjacency_list[v].add(w)
         self._adjacency_list[w]  # add w to adjacency list
 
-    # TODO: consdier change to __contains__ magic method
-    def has_node(self, node: Node) -> bool:
+    def add_node(self, node: Node) -> None:
+        self._adjacency_list[node]
+
+    def __contains__(self, node: Node) -> bool:
         return node in self._adjacency_list
 
     def bfs(self, source: Node) -> Iterator[Node]:

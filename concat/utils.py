@@ -1,7 +1,11 @@
 import os
-from typing import Optional
 
-__all__ = ["get_file_content", "join_path", "get_implem_from_header"]
+__all__ = [
+    "get_file_content",
+    "write_file_content",
+    "join_path",
+    "filebasename_without_ext",
+]
 
 
 def get_file_content(filepath: str) -> str:
@@ -18,28 +22,10 @@ def write_file_content(filepath: str, content: str):
 # WARNING: On Windows, os.sep is '\\' (ie, a backslash character).
 # But the header file path in C file's #include directive uses '/' most of time.
 # We should not use os.path.join to do the path join job if we want portability.
-def join_path(*paths) -> str:
+def join_path(*paths: str) -> str:
     """Naive and simple path join utility."""
-    return "/".join(filter(lambda path: path is not "", paths))
+    return "/".join(paths)
 
 
-# TODO: further revision is needed to add robustness to the search
-# Handle possible cases that header files and implementation files
-# are put in two separate directories.
-def get_implem_from_header(filepath: str) -> Optional[str]:
-    """
-    Heuristic search
-    Return None if no corresponding implementation file is found
-    """
-    # sanity check
-    assert filepath.endswith(".h")
-    c_implem = filepath[: -len(".h")] + ".c"
-    cpp_implem = filepath[: -len(".h")] + ".cpp"
-    # TODO: unlikey case that both C and C++ implementation exist
-    if os.path.isfile(c_implem):
-        return c_implem
-    elif os.path.isfile(cpp_implem):
-        return cpp_implem
-    else:
-        return None
-    # return implem if os.path.isfile(implem) else None
+def filebasename_without_ext(filepath: str) -> str:
+    return os.path.splitext(os.path.basename(filepath))[0]

@@ -1,6 +1,8 @@
 import re
+from .constants import INCLUDE_NON_STD_LIB_PATTERN, INCLUDE_STD_LIB_PATTERN
 
 
+# FIXME
 def dummify_string_literals(content: str) -> str:
     DUMMY_CHARACTER = "0"
     # Use a negative lookbehind assertion to exclude escaped quotes
@@ -33,3 +35,25 @@ def remove_comments(content: str) -> str:
         return content
 
     return remove_multi_line_comments(remove_single_line_comments(content))
+
+
+# TODO: also remove trailing blank lines
+def remove_include_non_std_lib_directive(content: str) -> str:
+    return "\n".join(
+        line
+        for line in content.splitlines()
+        if not re.match(INCLUDE_NON_STD_LIB_PATTERN, line)
+    )
+
+
+# TODO: also remove trailing blank lines
+def move_include_std_lib_directive_to_top(content: str) -> str:
+    lines = content.splitlines()
+    includes = set()
+    body = []
+    for line in lines:
+        if re.match(INCLUDE_STD_LIB_PATTERN, line):
+            includes.add(line)
+        else:
+            body.append(line)
+    return "\n".join(sorted(includes) + [""] + body)

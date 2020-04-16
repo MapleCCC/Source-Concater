@@ -1,64 +1,67 @@
 import os
 import re
-from typing import Set
+from typing import Set, List, Optional
 
-from .process_c_source import remove_comments
-from .utils import get_file_content, get_implem_from_header, join_path
-
-# TODO: relax the regex
-# TODO: Take care of the unlikely case when standard lib is surrounded by "" instead of <> in the #include directive.
-# TODO: take care of any corner/edge cases that we could think of.
-# TODO: it's possible to include .cpp files
-# TODO: it's possible to include .hpp files
-# TODO: it's possible to include .tpp files
-INCLUDE_NON_STD_LIB_PATTERN = r"#include\s+\"(.*\.h)\""
-INCLUDE_STD_LIB_PATTERN = r"#include\s+<(.*)>"
+from .process_c_source import remove_comments, dummify_string_literals
+from .utils import get_file_content, join_path, filebasename_without_ext
+from .extra_itertools import filtertrue
+from .constants import INCLUDE_NON_STD_LIB_PATTERN
 
 
-def extract_dependencies_of_file(filepath: str) -> Set[str]:
+def seek_file(relative_path: str, possible_dir: List[str]) -> Optional[str]:
+    for path in possible_dir:
+        candidate = join_path(path, relative_path)
+        if os.path.isfile(candidate):
+            return candidate
+    return None
+
+
+# TODO: further revision is needed to add robustness to the search
+# Handle possible cases that header files and implementation files
+# are put in two separate directories.
+# TODO: handle unlikey case that both C and C++ implementation exist
+def get_implem_from_header(filepath: str, source_dir: List[str]) -> Optional[str]:
+    """
+    Heuristic search
+    Return None if no corresponding implementation file is found
+    """
+    # sanity check
+    assert filepath.endswith((".h", ".hpp", ".tpp"))
+    c_implem = seek_file(filebasename_without_ext(filepath) + ".c", source_dir)
+    cpp_implem = seek_file(filebasename_without_ext(filepath) + ".cpp", source_dir)
+
+    if c_implem and os.path.isfile(c_implem):
+        return c_implem
+    elif cpp_implem and os.path.isfile(cpp_implem):
+        return cpp_implem
+    else:
+        return None
+
+
+def extract_dependencies_of_file(filepath: str, include_dir: List[str]) -> Set[str]:
     content = get_file_content(filepath)
-    # matches = (
-    #     re.match(INCLUDE_NON_STD_LIB_PATTERN, line) for line in content.splitlines()
-    # )
-    # return set(
-    #     # WARNING: On Windows, os.sep is '\\' (ie, a backslash character).
-    #     # But the header file path in C file's #include directive uses '/' most of time.
-    #     # We should not use os.path.join to do the path join job if we want portability.
-    #     # os.path.join(os.path.dirname(filepath), match.group(1))
-    #     join_path(os.path.dirname(filepath), match.group(1))
-    #     for match in matches
-    #     if match
-    # )
     content = remove_comments(content)
+    # FIXME
+    # content = dummyfy_string_literals(content)
     matches = re.findall(INCLUDE_NON_STD_LIB_PATTERN, content)
-    return set(join_path(os.path.dirname(filepath), match) for match in matches)
-
-
-def get_dependencies_of_library(filepath: str) -> Set[str]:
-    deps = extract_dependencies_of_file(filepath)
-    implem = get_implem_from_header(filepath)
-    if implem:
-        deps |= extract_dependencies_of_file(implem) - {filepath}
+    # WARNING: On Windows, os.sep is '\\' (ie, a backslash character).
+    # But the header file path in C file's #include directive uses '/' most of time.
+    # We should not use os.path.join to do the path join job if we want portability.
+    deps = set()
+    for match in matches:
+        abspath = seek_file(match, include_dir)
+        if not abspath:
+            raise FileNotFoundError(f"Can't find depedency of {filepath}: {match}")
+        deps.add(abspath)
     return deps
 
 
-# TODO: also remove trailing blank lines
-def remove_include_non_std_lib_directive(content: str) -> str:
-    return "\n".join(
-        line
-        for line in content.splitlines()
-        if not re.match(INCLUDE_NON_STD_LIB_PATTERN, line)
-    )
-
-
-# TODO: also remove trailing blank lines
-def move_include_std_lib_directive_to_top(content: str) -> str:
-    lines = content.splitlines()
-    includes = set()
-    body = []
-    for line in lines:
-        if re.match(INCLUDE_STD_LIB_PATTERN, line):
-            includes.add(line)
-        else:
-            body.append(line)
-    return "\n".join(sorted(includes) + [""] + body)
+def get_dependencies_of_library(
+    filepath: str, include_dir: List[str], source_dir: List[str]
+) -> Set[str]:
+    deps = extract_dependencies_of_file(filepath, include_dir)
+    if filepath.endswith((".h", ".hpp", ".tpp")):
+        implem = get_implem_from_header(filepath, source_dir)
+        if implem:
+            deps |= extract_dependencies_of_file(implem, include_dir) - {filepath}
+    return deps

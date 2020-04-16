@@ -1,44 +1,43 @@
 #!/usr/bin/env python3
 
 import argparse
-import os
 import subprocess
 from pprint import PrettyPrinter
-from typing import *
+from typing import List
 
-from .extract_dependencies import (
-    extract_dependencies_of_file,
-    get_dependencies_of_library,
+from .extract_dependencies import get_dependencies_of_library, get_implem_from_header
+from .graph import Graph, CircularDependencyError
+from .utils import get_file_content, write_file_content, filebasename_without_ext
+from .process_c_source import (
     move_include_std_lib_directive_to_top,
     remove_include_non_std_lib_directive,
 )
-from .graph import *
-from .utils import get_file_content, write_file_content, get_implem_from_header
+from .extra_itertools import filtertrue
 
 print = PrettyPrinter().pprint
 
 # TODO: implement in more sane way. Reduce McCabe complexity. Consider use queue.
-def generate_graph(entry: str) -> Graph:
+def generate_graph(entry: str, include_dir: List[str], source_dir: List[str]) -> Graph:
     graph = Graph()
-    waitlist = {entry}
-    while waitlist:
-        newlist = set()
-        for elem in waitlist:
-            if not graph.has_node(elem):
-                if elem.endswith(".h"):
-                    deps = get_dependencies_of_library(elem)
-                else:
-                    deps = extract_dependencies_of_file(elem)
-                for dep in deps:
-                    graph.add_edge((elem, dep))
-                    if not graph.has_node(dep):
-                        newlist.add(dep)
-        waitlist = newlist
+    traversed = set()
+    stack = [entry]
+
+    while stack:
+        elem = stack.pop()
+        if elem in traversed:
+            continue
+        graph.add_node(elem)
+        deps = get_dependencies_of_library(elem, include_dir, source_dir)
+        for dep in deps:
+            graph.add_edge(elem, dep)
+        stack.extend(deps)
+        traversed.add(elem)
+
     return graph
 
 
-def concat_source(entry: str) -> str:
-    graph = generate_graph(entry)
+def concat_source(entry: str, include_dir: List[str], source_dir: List[str]) -> str:
+    graph = generate_graph(entry, include_dir, source_dir)
     back_edge = graph.detect_back_edge(entry)
     if back_edge:
         raise CircularDependencyError(
@@ -48,8 +47,8 @@ def concat_source(entry: str) -> str:
     inv = graph.get_invert_graph()
     topo_sorted = list(inv.topological_sort())
     headers = topo_sorted[:-1]
-    implems = list(filter(None, map(get_implem_from_header, headers)))
-    concated = headers + [entry] + implems[::-1]  # type: ignore
+    implems = filtertrue(map(lambda x: get_implem_from_header(x, source_dir), headers))
+    concated = headers + [entry] + list(reversed(list(implems)))  # type: ignore
 
     # insert blank line between file contents
     output = "\n".join(map(get_file_content, concated))
@@ -64,13 +63,27 @@ def main():
     parser.add_argument("entry")
     parser.add_argument("--build", action="store_true")
     parser.add_argument("--cpp", action="store_true")
-    # parser.add_argument("-I", "--include-dir")
-    # parser.add_argument("-s", "--source-dir")
+    parser.add_argument("-I", "--include-dir", nargs="*")
+    parser.add_argument("-S", "--source-dir", nargs="*")
     # parser.add_argument("--mode")
     # parser.add_argument("-o", "--output")
+    # parser.add_argument("-v", "--verbose")
+    # parser.add_argument("-q", "--quiet")
+
     args = parser.parse_args()
 
-    output = concat_source(args.entry)
+    entry = args.entry
+    include_dir = args.include_dir
+    source_dir = args.source_dir
+
+    if not include_dir:
+        include_dir = []
+    include_dir.insert(0, ".")
+    if not source_dir:
+        source_dir = []
+    source_dir.insert(0, ".")
+
+    output = concat_source(entry, include_dir, source_dir)
 
     lang_mode = "cpp" if args.cpp or args.entry.endswith(".cpp") else "c"
 
@@ -82,7 +95,7 @@ def main():
     if args.build:
         # Alternative, use clang/clang++ as compiler
         compiler = "g++" if lang_mode == "cpp" else "gcc"
-        exe_name = os.path.splitext(os.path.basename(args.entry))[0]
+        exe_name = filebasename_without_ext(args.entry)
 
         complproc = subprocess.run([compiler, output_filename, "-o", exe_name])
         if complproc.returncode == 0:
