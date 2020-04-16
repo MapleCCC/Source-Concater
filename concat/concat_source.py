@@ -58,8 +58,7 @@ def concat_source(entry: str, include_dir: List[str], source_dir: List[str]) -> 
     return output
 
 
-def main():
-    parser = argparse.ArgumentParser("Automatically Concatenate C/C++ Source Files")
+def add_arguments(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("entry", help="The entry source file to begin searching")
     parser.add_argument(
         "--build",
@@ -86,6 +85,10 @@ def main():
     # parser.add_argument("-v", "--verbose")
     # parser.add_argument("-q", "--quiet")
 
+
+def main():
+    parser = argparse.ArgumentParser("Automatically Concatenate C/C++ Source Files")
+    add_arguments(parser)
     args = parser.parse_args()
 
     entry = args.entry
