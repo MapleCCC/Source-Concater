@@ -132,12 +132,12 @@ class Graph:
 
 if __name__ == "__main__":
     g = Graph()
-    g.add_edge(("0", "1"))
-    g.add_edge(("1", "2"))
-    g.add_edge(("0", "3"))
-    g.add_edge(("3", "4"))
-    g.add_edge(("1", "4"))
-    g.add_edge(("4", "2"))
+    g.add_edge("0", "1")
+    g.add_edge("1", "2")
+    g.add_edge("0", "3")
+    g.add_edge("3", "4")
+    g.add_edge("1", "4")
+    g.add_edge("4", "2")
     print(g)
     print(list(g.bfs("0")))
     print(list(g.dfs("0")))
