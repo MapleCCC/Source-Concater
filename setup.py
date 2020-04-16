@@ -24,8 +24,8 @@ setuptools.setup(
     install_requires=open("requirements.txt", "r").read().splitlines(),
     entry_points={
         "console_scripts": [
-            "concat=concat.concat_source:main",
-            # "concat-build=concat.concat_source:",
+            "concat=concat.__main__:main",
+            # "concat-build=concat.__main__:",
         ]
     },
 )
