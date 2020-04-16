@@ -67,6 +67,15 @@ optional arguments:
 '''
 ```
 
+Optionally, use as module, progrmmatically
+
+```python
+from concat import concat_source
+
+output = concat_source("main.lzw", include_dir="include", source_dir="src")
+print(output)
+```
+
 ## License
 
 [WTFPL 2.0](./LICENSE)
