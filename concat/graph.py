@@ -1,9 +1,10 @@
-from typing import *
 from collections import defaultdict
+from typing import *
 
 # TODO: generalize Node data type, so that it can contain generic types of data
-# Currently we only support string node type.
+# Currently we only support str as node type.
 
+# Thin semantic type abstraction
 Node = str
 Edge = Tuple[Node, Node]
 AdjacencyList = Dict[Node, Set[Node]]
