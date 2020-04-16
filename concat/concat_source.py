@@ -59,12 +59,28 @@ def concat_source(entry: str, include_dir: List[str], source_dir: List[str]) -> 
 
 
 def main():
-    parser = argparse.ArgumentParser("Concatenate C Source Files")
-    parser.add_argument("entry")
-    parser.add_argument("--build", action="store_true")
-    parser.add_argument("--cpp", action="store_true")
-    parser.add_argument("-I", "--include-dir", nargs="*")
-    parser.add_argument("-S", "--source-dir", nargs="*")
+    parser = argparse.ArgumentParser("Automatically Concatenate C/C++ Source Files")
+    parser.add_argument("entry", help="The entry source file to begin searching")
+    parser.add_argument(
+        "--build",
+        action="store_true",
+        help="Control whether to build the concatenated source file after concatenation",
+    )
+    parser.add_argument(
+        "--cpp", action="store_true", help="Specify language mode to be C++"
+    )
+    parser.add_argument(
+        "-I",
+        "--include-dir",
+        nargs="*",
+        help="Sepcify search path for include headers. Can specify multiple paths. Current working directory will be inserted before all paths.",
+    )
+    parser.add_argument(
+        "-S",
+        "--source-dir",
+        nargs="*",
+        help="Sepcify search path for source files corresponding to headers. Can specify multiple paths. Current working directory will be inserted before all paths.",
+    )
     # parser.add_argument("--mode")
     # parser.add_argument("-o", "--output")
     # parser.add_argument("-v", "--verbose")
