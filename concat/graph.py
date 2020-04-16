@@ -1,5 +1,5 @@
-from collections import defaultdict
-from typing import *
+from collections import defaultdict, deque
+from typing import Optional, Set, List, Dict, Tuple, Iterator
 
 # TODO: generalize Node data type, so that it can contain generic types of data
 # Currently we only support str as node type.
@@ -26,38 +26,43 @@ class Graph:
         if not isinstance(v, str) or not isinstance(w, str):
             raise NotImplementedError
         self._adjacency_list[v].add(w)
+        self._adjacency_list[w]  # add w to adjacency list
 
+    # TODO: consdier change to __contains__ magic method
     def has_node(self, node: Node) -> bool:
         return node in self._adjacency_list
 
-    def bfs(self, source: Node) -> Generator[Node, Any, Any]:
+    def bfs(self, source: Node) -> Iterator[Node]:
         assert source in self._adjacency_list
-        q = [source]
+        queue = deque([source])
         traversed = set()
-        while q:
-            for node in q:
-                yield node
-                traversed.add(node)
-                for child in self._adjacency_list[node]:
-                    if child not in traversed:
-                        q.append(child)
+        while queue:
+            node = queue.popleft()
+            if node in traversed:
+                continue
+            yield node
+            traversed.add(node)
+            queue.extend(self._adjacency_list[node])
 
-    def dfs(self, source: Node) -> Generator[Node, Any, Any]:
-        assert source in self._adjacency_list
-        stack = [source]
+    # Optionally, we can implement dfs in iterative manner instead of recursive manner.
+    # The main difference is whether user-maintain stack or runtime stack is used to contain information.
+    def dfs(self, source: Node) -> Iterator[Node]:
         traversed = set()
-        while stack:
-            for node in stack[::-1]:
-                yield node
-                traversed.add(node)
-                for child in self._adjacency_list[node]:
-                    if child not in traversed:
-                        stack.append(child)
+        yield from self._dfs(source, traversed)
+
+    def _dfs(self, node: Node, traversed: Set[Node]) -> Iterator[Node]:
+        assert node in self._adjacency_list
+        if node in traversed:
+            return
+        yield node
+        traversed.add(node)
+        for child in self._adjacency_list[node]:
+            yield from self._dfs(child, traversed)
 
     def detect_back_edge(self, source: Node) -> Optional[Edge]:
         assert source in self._adjacency_list
         stack = [source]
-        current_path = [None]
+        current_path: List[Optional[Node]] = [None]
         while stack:
             node = stack[-1]
             if node != current_path[-1]:
@@ -92,25 +97,45 @@ class Graph:
         new_graph._adjacency_list = new_adjlist
         return new_graph
 
-    def topological_sort(self) -> Generator[Node, Any, Any]:
+    def topological_sort(self) -> Iterator[Node]:
         def find_sources(graph: Graph) -> Set[Node]:
             adjlist = graph._adjacency_list
             sources = set(adjlist.keys())
             for children in adjlist.values():
-                for child in children:
-                    if child in sources:
-                        sources.remove(child)
+                sources -= children
             return sources
 
         def remove_sources(graph: Graph) -> Set[Node]:
             srcs = find_sources(graph)
             for src in srcs:
                 del graph._adjacency_list[src]
+            for node in graph._adjacency_list:
+                graph._adjacency_list[node] -= srcs
             return srcs
 
         _graph = self.copy()
         srcs = remove_sources(_graph)
         while srcs:
-            for src in srcs:
-                yield src
+            yield from srcs  # type: ignore
             srcs = remove_sources(_graph)
+
+    def __str__(self) -> str:
+        return "Graph({})".format(dict(self._adjacency_list))
+
+    # TODO: ensure that eval(repr(x)) == x
+    def __repr__(self) -> str:
+        return self.__str__()
+
+
+if __name__ == "__main__":
+    g = Graph()
+    g.add_edge(("0", "1"))
+    g.add_edge(("1", "2"))
+    g.add_edge(("0", "3"))
+    g.add_edge(("3", "4"))
+    g.add_edge(("1", "4"))
+    g.add_edge(("4", "2"))
+    print(g)
+    print(list(g.bfs("0")))
+    print(list(g.dfs("0")))
+    print(list(g.topological_sort()))
