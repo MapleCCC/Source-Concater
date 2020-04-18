@@ -5,6 +5,4 @@ __all__ = ["filtertrue"]
 
 
 def filtertrue(iterable: Iterable, predicate: Optional[Callable] = None) -> Iterable:
-    if predicate is None:
-        predicate = bool
-    return filterfalse(lambda x: not predicate(x), iterable)
+    return filter(predicate, iterable)  # type: ignore
