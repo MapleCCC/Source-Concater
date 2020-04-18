@@ -38,14 +38,15 @@ $ python -m pip install -e .  # Mind the dot at the end
 After installation, a command line tool `concat` is available for use.
 
 ```bash
-concat main.cpp -I include -S src
+$ concat main.cpp -I include -S src
 'Wrote concated output to concated.cpp'
 
-concat --help
+$ concat --help
 '''
 usage: Automatically Concatenate C/C++ Source Files [-h] [--build] [--cpp]
                                                     [-I [INCLUDE_DIR [INCLUDE_DIR ...]]]
                                                     [-S [SOURCE_DIR [SOURCE_DIR ...]]]
+                                                    [-o OUTPUT]
                                                     entry
 
 positional arguments:
@@ -64,6 +65,8 @@ optional arguments:
                         Sepcify search path for source files corresponding to
                         headers. Can specify multiple paths. Current working
                         directory will be inserted before all paths.
+  -o OUTPUT, --output OUTPUT
+                        Specify output file name
 '''
 ```
 

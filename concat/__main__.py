@@ -80,8 +80,8 @@ def add_arguments(parser: argparse.ArgumentParser) -> None:
         nargs="*",
         help="Sepcify search path for source files corresponding to headers. Can specify multiple paths. Current working directory will be inserted before all paths.",
     )
+    parser.add_argument("-o", "--output", help="Specify output file name")
     # parser.add_argument("--mode")
-    # parser.add_argument("-o", "--output")
     # parser.add_argument("-v", "--verbose")
     # parser.add_argument("-q", "--quiet")
 
@@ -102,11 +102,15 @@ def main():
         source_dir = []
     source_dir.insert(0, ".")
 
-    output = concat_source(entry, include_dir, source_dir)
-
     lang_mode = "cpp" if args.cpp or args.entry.endswith(".cpp") else "c"
 
-    output_filename = "concated.cpp" if lang_mode == "cpp" else "concated.c"
+    if args.output:
+        output_filename = args.output
+    else:
+        output_filename = "concated.cpp" if lang_mode == "cpp" else "concated.c"
+
+    output = concat_source(entry, include_dir, source_dir)
+
     # Consider use flag "x" (ie, exclusive creation)
     write_file_content(output_filename, output)
     print(f"Wrote concated output to {output_filename}")
