@@ -4,7 +4,7 @@ from typing import List, Optional, Set
 
 from .constants import INCLUDE_NON_STD_LIB_PATTERN
 from .process_c_source import dummify_string_literals, remove_comments
-from .utils import filebasename_without_ext, get_file_content, join_path
+from .utils import filebasename_without_ext, join_path
 
 
 def seek_file(relative_path: str, possible_dir: List[str]) -> Optional[str]:
@@ -38,7 +38,7 @@ def get_implem_from_header(filepath: str, source_dir: List[str]) -> Optional[str
 
 
 def extract_dependencies_of_file(filepath: str, include_dir: List[str]) -> Set[str]:
-    content = get_file_content(filepath)
+    content = Path(filepath).read_text(encoding="utf-8")
     content = remove_comments(content)
     # FIXME
     # content = dummyfy_string_literals(content)

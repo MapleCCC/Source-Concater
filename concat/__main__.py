@@ -12,7 +12,7 @@ from .process_c_source import (
     move_include_std_lib_directive_to_top,
     remove_include_non_std_lib_directive,
 )
-from .utils import filebasename_without_ext, get_file_content, write_file_content
+from .utils import filebasename_without_ext
 
 print = PrettyPrinter().pprint
 
@@ -51,7 +51,7 @@ def concat_source(entry: str, include_dir: List[str], source_dir: List[str]) -> 
     concated = headers + [entry] + list(reversed(list(implems)))  # type: ignore
 
     # insert blank line between file contents
-    output = "\n".join(map(get_file_content, concated))
+    output = "\n".join(Path(x).read_text(encoding="utf-8") for x in concated)
     output = remove_include_non_std_lib_directive(output)
     output = move_include_std_lib_directive_to_top(output)
 
@@ -111,8 +111,7 @@ def main():
 
     output = concat_source(entry, include_dir, source_dir)
 
-    # Consider use flag "x" (ie, exclusive creation)
-    write_file_content(output_filename, output)
+    Path(output_filename).write_text(output, encoding="utf-8")
     print(f"Wrote concated output to {output_filename}")
 
     if args.build:

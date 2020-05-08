@@ -1,21 +1,9 @@
 import os
 
 __all__ = [
-    "get_file_content",
-    "write_file_content",
     "join_path",
     "filebasename_without_ext",
 ]
-
-
-def get_file_content(filepath: str) -> str:
-    with open(filepath, "r", encoding="utf-8") as f:
-        return f.read()
-
-
-def write_file_content(filepath: str, content: str):
-    with open(filepath, "w", encoding="utf-8") as f:
-        f.write(content)
 
 
 # Further revision is required to enhance portability and robustness.
