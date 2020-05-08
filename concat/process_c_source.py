@@ -7,9 +7,12 @@ from .config import DEFAULT_FORMATTER
 from .constants import INCLUDE_NON_STD_LIB_PATTERN, INCLUDE_STD_LIB_PATTERN
 
 
-def reformat_source(source, format_style, format_fallback_style, assume_filename):
+def reformat_source(
+    source: str, format_style: str, format_fallback_style: str, assume_filename: str
+) -> str:
     if not shutil.which(DEFAULT_FORMATTER):
         raise RuntimeError("Couldn't find `clang-format` in PATH.")
+
     try:
         return subprocess.run(
             [
@@ -62,8 +65,7 @@ def remove_comments(content: str) -> str:
         return "\n".join(out)
 
     def remove_multi_line_comments(content: str) -> str:
-        # raise NotImplementedError
-        return content
+        raise NotImplementedError
 
     return remove_multi_line_comments(remove_single_line_comments(content))
 

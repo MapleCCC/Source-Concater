@@ -1,4 +1,3 @@
-import os
 import re
 from pathlib import Path
 from typing import List, Optional, Set
@@ -16,8 +15,6 @@ def seek_file(relative_path: Path, possible_dir: List[Path]) -> Optional[Path]:
 
 
 # TODO: further revision is needed to add robustness to the search
-# Handle possible cases that header files and implementation files
-# are put in two separate directories.
 # TODO: handle unlikey case that both C and C++ implementation exist
 def get_implem_from_header(filepath: Path, source_dir: List[Path]) -> Optional[Path]:
     """

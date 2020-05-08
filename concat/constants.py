@@ -14,6 +14,7 @@ INCLUDE_STD_LIB_PATTERN = re.compile(r"#include\s+<(.*)>")
 
 # TODO: rename "standard lbrary" to "system header"
 
-# Currently only a sanity check.
+# TODO: Enhance robustness. Handle more cases.
+# currently only a sanity check.
 def IS_HEADER_FILE(file: Path) -> bool:
     return file.suffix in (".h", ".hpp", ".tpp")

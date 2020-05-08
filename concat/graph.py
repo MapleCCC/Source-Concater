@@ -2,7 +2,7 @@
 # is added to public interface after Python3.9.
 
 from collections import defaultdict, deque
-from typing import Dict, Iterator, List, Optional, Set, Tuple, Any
+from typing import Any, Dict, Iterator, List, Optional, Set, Tuple
 
 # Thin semantic type abstraction
 Node = Any
@@ -25,7 +25,8 @@ class Graph:
         if v == w:
             raise CircularDependencyError("Self-pointing dependency is not accepted")
         self._adjacency_list[v].add(w)
-        self._adjacency_list[w]  # add w to adjacency list
+        # add w to adjacency list. This line is necessary because without it, some nodes who are sinks of the graph (i.e., have zero out-going edge) would not appear as keys in adjacency list.
+        self._adjacency_list[w]
 
     def add_node(self, node: Node) -> None:
         self._adjacency_list[node]
@@ -98,6 +99,7 @@ class Graph:
         new_graph._adjacency_list = new_adjlist
         return new_graph
 
+    # TODO: topological_sort should raise CircularDependencyError when necessary.
     def topological_sort(self) -> Iterator[Node]:
         def find_sources(graph: Graph) -> Set[Node]:
             adjlist = graph._adjacency_list
@@ -115,6 +117,7 @@ class Graph:
             return srcs
 
         _graph = self.copy()
+        # TODO: use walrus operator to refactor
         srcs = remove_sources(_graph)
         while srcs:
             yield from srcs  # type: ignore

@@ -4,6 +4,7 @@ SRC_DIR=concat
 
 all:
 
+# TODO: Automate testing. Setup pytest workflow
 test:
 	python -m concat test/A.c
 
