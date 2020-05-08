@@ -2,6 +2,7 @@
 
 import argparse
 from typing import List
+from pathlib import Path
 
 from .extra_itertools import filtertrue
 from .extract_dependencies import get_dependencies_of_library, get_implem_from_header
@@ -12,11 +13,12 @@ from .process_c_source import (
     reformat_source,
 )
 from .config import DEFAULT_FORMAT_FALLBACK_STYLE, DEFAULT_FORMAT_STYLE
-from .utils import get_filename_extension
 
 
 # TODO: implement in more sane way. Reduce McCabe complexity. Consider use queue.
-def generate_graph(entry: str, include_dir: List[str], source_dir: List[str]) -> Graph:
+def generate_graph(
+    entry: Path, include_dir: List[Path], source_dir: List[Path]
+) -> Graph:
     graph = Graph()
     traversed = set()
     stack = [entry]
@@ -36,7 +38,7 @@ def generate_graph(entry: str, include_dir: List[str], source_dir: List[str]) ->
 
 
 # TODO: CircularDependencyError should be raised by Graph class itself.
-def concat_source(entry: str, include_dir: List[str], source_dir: List[str]) -> str:
+def concat_source(entry: Path, include_dir: List[Path], source_dir: List[Path]) -> str:
     graph = generate_graph(entry, include_dir, source_dir)
     back_edge = graph.detect_back_edge(entry)
     if back_edge:
@@ -51,7 +53,7 @@ def concat_source(entry: str, include_dir: List[str], source_dir: List[str]) -> 
     concated = headers + [entry] + list(reversed(list(implems)))  # type: ignore
 
     # insert blank line between file contents
-    output = "\n".join(Path(x).read_text(encoding="utf-8") for x in concated)
+    output = "\n".join(file.read_text(encoding="utf-8") for file in concated)
     output = remove_include_non_std_lib_directive(output)
     output = move_include_std_lib_directive_to_top(output)
 
@@ -102,19 +104,20 @@ def main():
     add_arguments(parser)
     args = parser.parse_args()
 
-    entry = args.entry
+    entry = Path(args.entry)
 
     include_dir = args.include_dir
     source_dir = args.source_dir
-
     if not include_dir:
         include_dir = []
     include_dir.insert(0, ".")
+    include_dir = list(map(Path, include_dir))
     if not source_dir:
         source_dir = []
     source_dir.insert(0, ".")
+    source_dir = list(map(Path, source_dir))
 
-    lang = get_filename_extension(entry)
+    lang = entry.suffix
 
     if args.output:
         output_filename = args.output

@@ -1,3 +1,5 @@
+from pathlib import Path
+
 __all__ = ["INCLUDE_NON_STD_LIB_PATTERN", "INCLUDE_STD_LIB_PATTERN", "IS_HEADER_FILE"]
 
 # TODO: precompile frequently used regular expressions.
@@ -13,4 +15,5 @@ INCLUDE_STD_LIB_PATTERN = r"#include\s+<(.*)>"
 # TODO: rename "standard lbrary" to "system header"
 
 # Currently only a sanity check.
-IS_HEADER_FILE = lambda x: x.endswith((".h", ".hpp", ".tpp"))
+def IS_HEADER_FILE(file: Path) -> bool:
+    return file.suffix in (".h", ".hpp", ".tpp")
