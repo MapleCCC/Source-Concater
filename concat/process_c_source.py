@@ -87,7 +87,8 @@ def remove_include_non_std_lib_directive(content: str) -> str:
             remove_blank_line_flag = False
             new_lines.append(line)
         past = line
-    return "\n".join(new_lines)
+    # Add file-end newline to be POSIX-compatible
+    return "\n".join(new_lines) + "\n"
 
 
 # TODO: sort includes, and separate includes according to categories. Refer to clang-format for example.
@@ -111,4 +112,5 @@ def move_include_std_lib_directive_to_top(content: str) -> str:
             remove_blank_line_flag = False
             body.append(line)
         past = line
-    return "\n".join(sorted(includes) + [""] + body)
+    # Add file-end newline to be POSIX-compatible
+    return "\n".join(sorted(includes) + [""] + body) + "\n"

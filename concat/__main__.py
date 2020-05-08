@@ -47,6 +47,9 @@ def concat_source(entry: Path, include_dir: List[Path], source_dir: List[Path]) 
 
     # insert blank line between file contents
     output = "\n".join(file.read_text(encoding="utf-8") for file in concated)
+    # Add file-end newline to be POSIX-compatible
+    if output and output[-1] != "\n":
+        output += "\n"
     output = remove_include_non_std_lib_directive(output)
     output = move_include_std_lib_directive_to_top(output)
 
