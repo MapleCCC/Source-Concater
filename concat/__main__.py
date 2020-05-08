@@ -119,7 +119,7 @@ def main():
     if args.output:
         output_filename = args.output
     else:
-        output_filename = "concated." + lang
+        output_filename = "concated" + lang
 
     output = concat_source(entry, include_dir, source_dir)
 
