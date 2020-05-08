@@ -10,6 +10,8 @@
 - parser.add_argument("--dump-makefile")
 - Add feature: dump dependencies. Useful in specifying Makefile prerequisite.
 - Use pathlib.Path to replace plain str. Improve readability. Construct proper abstraction (i.e. Path type to represent path).
+- Update README
+- Add use example in README
 
 ## Done
 

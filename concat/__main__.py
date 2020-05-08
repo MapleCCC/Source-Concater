@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
 
 import argparse
-import subprocess
-from pprint import PrettyPrinter
 from typing import List
 
 from .extra_itertools import filtertrue
@@ -16,7 +14,6 @@ from .process_c_source import (
 from .config import DEFAULT_FORMAT_FALLBACK_STYLE, DEFAULT_FORMAT_STYLE
 from .utils import get_filename_extension
 
-print = PrettyPrinter().pprint
 
 # TODO: implement in more sane way. Reduce McCabe complexity. Consider use queue.
 def generate_graph(entry: str, include_dir: List[str], source_dir: List[str]) -> Graph:
@@ -61,6 +58,7 @@ def concat_source(entry: str, include_dir: List[str], source_dir: List[str]) -> 
     return output
 
 
+# TODO: break long string literals into multi-line, to enhance readability.
 def add_arguments(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("entry", help="The entry source file to begin searching")
     parser.add_argument(
@@ -96,6 +94,7 @@ def add_arguments(parser: argparse.ArgumentParser) -> None:
     # parser.add_argument("--mode")
     # parser.add_argument("-v", "--verbose")
     # parser.add_argument("-q", "--quiet")
+    # parser.add_argument("--dump-makefile")
 
 
 def main():
@@ -104,6 +103,7 @@ def main():
     args = parser.parse_args()
 
     entry = args.entry
+
     include_dir = args.include_dir
     source_dir = args.source_dir
 
@@ -114,7 +114,7 @@ def main():
         source_dir = []
     source_dir.insert(0, ".")
 
-    lang  = get_filename_extension(entry)
+    lang = get_filename_extension(entry)
 
     if args.output:
         output_filename = args.output

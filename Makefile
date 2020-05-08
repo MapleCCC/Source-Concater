@@ -23,4 +23,4 @@ lint:
 todo:
 	grep -ri --include=*.py TODO
 
-.PHONY: all test reformat lint
+.PHONY: all test check-unused-imports cui reformat lint todo
