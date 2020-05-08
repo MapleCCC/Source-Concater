@@ -3,6 +3,7 @@ import os
 __all__ = [
     "join_path",
     "filebasename_without_ext",
+    "get_filename_extension",
 ]
 
 
@@ -17,3 +18,7 @@ def join_path(*paths: str) -> str:
 
 def filebasename_without_ext(filepath: str) -> str:
     return os.path.splitext(os.path.basename(filepath))[0]
+
+
+def get_filename_extension(filepath: str) -> str:
+    return os.path.splitext(os.path.basename(filepath))[1]

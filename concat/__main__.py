@@ -14,6 +14,7 @@ from .process_c_source import (
     reformat_source,
 )
 from .config import DEFAULT_FORMAT_FALLBACK_STYLE, DEFAULT_FORMAT_STYLE
+from .utils import get_filename_extension
 
 print = PrettyPrinter().pprint
 
@@ -62,9 +63,6 @@ def concat_source(entry: str, include_dir: List[str], source_dir: List[str]) -> 
 
 def add_arguments(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("entry", help="The entry source file to begin searching")
-    parser.add_argument(
-        "--cpp", action="store_true", help="Specify language mode to be C++"
-    )
     parser.add_argument(
         "-I",
         "--include-dir",
@@ -115,12 +113,12 @@ def main():
         source_dir = []
     source_dir.insert(0, ".")
 
-    lang_mode = "cpp" if args.cpp or args.entry.endswith(".cpp") else "c"
+    lang  = get_filename_extension(entry)
 
     if args.output:
         output_filename = args.output
     else:
-        output_filename = "concated.cpp" if lang_mode == "cpp" else "concated.c"
+        output_filename = "concated." + lang
 
     output = concat_source(entry, include_dir, source_dir)
 
