@@ -11,8 +11,9 @@ from .graph import CircularDependencyError, Graph
 from .process_c_source import (
     move_include_std_lib_directive_to_top,
     remove_include_non_std_lib_directive,
+    reformat_source,
 )
-from .utils import filebasename_without_ext
+from .config import DEFAULT_FORMAT_FALLBACK_STYLE, DEFAULT_FORMAT_STYLE
 
 print = PrettyPrinter().pprint
 
@@ -78,9 +79,20 @@ def add_arguments(parser: argparse.ArgumentParser) -> None:
     )
     parser.add_argument("-o", "--output", help="Specify output file name")
     parser.add_argument(
-        "--format", help="Whether to format concated code with clang-format"
+        "--format",
+        default=False,
+        help="Whether to format concated code with clang-format",
     )
-    parser.add_argument("--format-style", help="Specify the clang-format style")
+    parser.add_argument(
+        "--format-style",
+        default=DEFAULT_FORMAT_STYLE,
+        help="Specify the clang-format style. Default is `file`, which means first try to detect `.clang-format` configuration file under the same directory with the entry source file, and if not found, fall back to internal fall-back format style.",
+    )
+    parser.add_argument(
+        "--format-fallback-style",
+        default=DEFAULT_FORMAT_FALLBACK_STYLE,
+        help="Specify the clang-format fallback style. Default is a predefined value.",
+    )
     parser.add_argument("--disable-move-sys-header-atop")
     # parser.add_argument("--mode")
     # parser.add_argument("-v", "--verbose")
@@ -112,37 +124,10 @@ def main():
 
     output = concat_source(entry, include_dir, source_dir)
 
-    # TODO: extract formatting logic to standalone function
-    # TODO: move some predefined literals to config.py
-    formatter = "clang-format"
-    format_style = args.format_style
-    if not format_style:
-        format_style = "file"
-    # TODO: break into multi-line string
-    fallback_format_style = (
-        "{BasedOnStyle: Google, "
-        + "IndentWidth: 4, "
-        + "AlwaysBreakAfterReturnType: TopLevelDefinitions, "
-        + "SortIncludes: true, "
-        + "IncludeBlocks: Regroup}"
-    )
-    output = subprocess.run(
-        [
-            formatter,
-            # Specify assume-filename so clang-format can properly detect language
-            "-assume-filename",
-            output_filename,
-            "-fallback-style",
-            fallback_format_style,
-            "-style",
-            format_style,
-        ],
-        input=output,
-        text=True,
-        encoding="utf-8",
-        capture_output=True,
-        check=True,
-    ).stdout
+    if args.format:
+        reformat_source(
+            output, args.format_style, args.format_fallback_style, output_filename
+        )
 
     Path(output_filename).write_text(output, encoding="utf-8")
     print(f"Wrote concated output to {output_filename}")

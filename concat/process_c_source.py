@@ -1,6 +1,35 @@
 import re
+import shutil
+import subprocess
+from subprocess import CalledProcessError
 
+from .config import DEFAULT_FORMATTER
 from .constants import INCLUDE_NON_STD_LIB_PATTERN, INCLUDE_STD_LIB_PATTERN
+
+
+def reformat_source(source, format_style, format_fallback_style, assume_filename):
+    if not shutil.which(DEFAULT_FORMATTER):
+        raise RuntimeError("Couldn't find `clang-format` in PATH.")
+    try:
+        return subprocess.run(
+            [
+                DEFAULT_FORMATTER,
+                "-style",
+                format_style,
+                "-fallback-style",
+                format_fallback_style,
+                # Specify assume-filename so clang-format can properly detect language
+                "-assume-filename",
+                assume_filename,
+            ],
+            input=source,
+            text=True,
+            encoding="utf-8",
+            capture_output=True,
+            check=True,
+        ).stdout
+    except CalledProcessError:
+        raise RuntimeError("Error when formatting concated source code file")
 
 
 # FIXME
