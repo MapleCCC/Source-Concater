@@ -1,7 +1,11 @@
+# TODO: replace with builtin implementation after functools.TopologicalSorter
+# is added to public interface after Python3.9.
+
 from collections import defaultdict, deque
 from typing import Dict, Iterator, List, Optional, Set, Tuple
 
-# TODO: generalize Node data type, so that it can contain generic types of data
+# TODO: generalize Node data type, so that it can contain generic types of data.
+# An abstract data strcture like graph should not care about concrete node data type.
 # Currently we only support str as node type.
 
 # Thin semantic type abstraction

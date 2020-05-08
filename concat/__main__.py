@@ -36,6 +36,7 @@ def generate_graph(entry: str, include_dir: List[str], source_dir: List[str]) ->
     return graph
 
 
+# TODO: CircularDependencyError should be raised by Graph class itself.
 def concat_source(entry: str, include_dir: List[str], source_dir: List[str]) -> str:
     graph = generate_graph(entry, include_dir, source_dir)
     back_edge = graph.detect_back_edge(entry)
@@ -114,6 +115,7 @@ def main():
     Path(output_filename).write_text(output, encoding="utf-8")
     print(f"Wrote concated output to {output_filename}")
 
+    # TODO: remove build feature. For both reduction of complexity and separation of duties.
     if args.build:
         # Alternative, use clang/clang++ as compiler
         compiler = "g++" if lang_mode == "cpp" else "gcc"

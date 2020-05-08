@@ -1,4 +1,3 @@
-from itertools import filterfalse
 from typing import Callable, Iterable, Optional
 
 __all__ = ["filtertrue"]

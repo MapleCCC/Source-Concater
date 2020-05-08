@@ -33,6 +33,7 @@ def remove_comments(content: str) -> str:
         return "\n".join(out)
 
     def remove_multi_line_comments(content: str) -> str:
+        # raise NotImplementedError
         return content
 
     return remove_multi_line_comments(remove_single_line_comments(content))
@@ -48,6 +49,7 @@ def remove_include_non_std_lib_directive(content: str) -> str:
 
 
 # TODO: also remove trailing blank lines
+# TODO: sort includes, and separate includes according to categories. Refer to clang-format for example.
 def move_include_std_lib_directive_to_top(content: str) -> str:
     lines = content.splitlines()
     includes = set()
