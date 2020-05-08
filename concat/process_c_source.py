@@ -76,12 +76,14 @@ def remove_include_non_std_lib_directive(content: str) -> str:
         if re.match(INCLUDE_NON_STD_LIB_PATTERN, line):
             if past == "":
                 remove_blank_line_flag = True
-        elif remove_blank_line_flag:
-            if line == "":
+        elif line == "":
+            if remove_blank_line_flag:
                 pass
             else:
-                remove_blank_line_flag = False
                 new_lines.append(line)
+        else:
+            remove_blank_line_flag = False
+            new_lines.append(line)
         past = line
     return "\n".join(new_lines)
 
@@ -98,11 +100,13 @@ def move_include_std_lib_directive_to_top(content: str) -> str:
             includes.add(line)
             if past == "":
                 remove_blank_line_flag = True
-        elif remove_blank_line_flag:
-            if line == "":
+        elif line == "":
+            if remove_blank_line_flag:
                 pass
             else:
-                remove_blank_line_flag = False
                 body.append(line)
+        else:
+            remove_blank_line_flag = False
+            body.append(line)
         past = line
     return "\n".join(sorted(includes) + [""] + body)
