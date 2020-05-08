@@ -99,13 +99,17 @@ class Graph:
         new_graph._adjacency_list = new_adjlist
         return new_graph
 
-    # TODO: topological_sort should raise CircularDependencyError when necessary.
     def topological_sort(self) -> Iterator[Node]:
         def find_sources(graph: Graph) -> Set[Node]:
             adjlist = graph._adjacency_list
             sources = set(adjlist.keys())
             for children in adjlist.values():
                 sources -= children
+            if not sources and adjlist:
+                raise CircularDependencyError(
+                    "Circular dependency detected! "
+                    + "Try to run the method detect_back_edge() to find back edges."
+                )
             return sources
 
         def remove_sources(graph: Graph) -> Set[Node]:

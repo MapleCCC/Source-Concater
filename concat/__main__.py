@@ -7,7 +7,7 @@ from typing import List
 from .config import DEFAULT_FORMAT_FALLBACK_STYLE, DEFAULT_FORMAT_STYLE
 from .extra_itertools import filtertrue
 from .extract_dependencies import get_dependencies_of_library, get_implem_from_header
-from .graph import CircularDependencyError, Graph
+from .graph import Graph
 from .process_c_source import (
     move_include_std_lib_directive_to_top,
     reformat_source,
@@ -37,15 +37,8 @@ def generate_graph(
     return graph
 
 
-# TODO: CircularDependencyError should be raised by Graph class itself.
 def concat_source(entry: Path, include_dir: List[Path], source_dir: List[Path]) -> str:
     graph = generate_graph(entry, include_dir, source_dir)
-    back_edge = graph.detect_back_edge(entry)
-    if back_edge:
-        raise CircularDependencyError(
-            f"Circular dependency detected!: '{back_edge[0]}'->'{back_edge[1]}'"
-        )
-
     inv = graph.get_invert_graph()
     topo_sorted = list(inv.topological_sort())
     headers = topo_sorted[:-1]
