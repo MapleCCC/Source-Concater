@@ -2,7 +2,7 @@ import os
 import re
 from typing import List, Optional, Set
 
-from .constants import INCLUDE_NON_STD_LIB_PATTERN
+from .constants import INCLUDE_NON_STD_LIB_PATTERN, IS_HEADER_FILE
 from .process_c_source import dummify_string_literals, remove_comments
 from .utils import filebasename_without_ext, join_path
 
@@ -25,7 +25,7 @@ def get_implem_from_header(filepath: str, source_dir: List[str]) -> Optional[str
     Return None if no corresponding implementation file is found
     """
     # sanity check
-    assert filepath.endswith((".h", ".hpp", ".tpp"))
+    assert IS_HEADER_FILE(filepath)
     c_implem = seek_file(filebasename_without_ext(filepath) + ".c", source_dir)
     cpp_implem = seek_file(filebasename_without_ext(filepath) + ".cpp", source_dir)
 
@@ -59,7 +59,7 @@ def get_dependencies_of_library(
     filepath: str, include_dir: List[str], source_dir: List[str]
 ) -> Set[str]:
     deps = extract_dependencies_of_file(filepath, include_dir)
-    if filepath.endswith((".h", ".hpp", ".tpp")):
+    if IS_HEADER_FILE(filepath):
         implem = get_implem_from_header(filepath, source_dir)
         if implem:
             deps |= extract_dependencies_of_file(implem, include_dir) - {filepath}

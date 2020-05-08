@@ -1,4 +1,4 @@
-__all__ = ["INCLUDE_NON_STD_LIB_PATTERN", "INCLUDE_STD_LIB_PATTERN"]
+__all__ = ["INCLUDE_NON_STD_LIB_PATTERN", "INCLUDE_STD_LIB_PATTERN", "IS_HEADER_FILE"]
 
 # TODO: precompile frequently used regular expressions.
 # TODO: relax the regex
@@ -11,3 +11,6 @@ INCLUDE_NON_STD_LIB_PATTERN = r"#include\s+\"(.*\.(?:h|hpp|tpp))\""
 INCLUDE_STD_LIB_PATTERN = r"#include\s+<(.*)>"
 
 # TODO: rename "standard lbrary" to "system header"
+
+# Currently only a sanity check.
+IS_HEADER_FILE = lambda x: x.endswith((".h", ".hpp", ".tpp"))
