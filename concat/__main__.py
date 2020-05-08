@@ -62,11 +62,6 @@ def concat_source(entry: str, include_dir: List[str], source_dir: List[str]) -> 
 def add_arguments(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("entry", help="The entry source file to begin searching")
     parser.add_argument(
-        "--build",
-        action="store_true",
-        help="Control whether to build the concatenated source file after concatenation",
-    )
-    parser.add_argument(
         "--cpp", action="store_true", help="Specify language mode to be C++"
     )
     parser.add_argument(
@@ -114,18 +109,6 @@ def main():
 
     Path(output_filename).write_text(output, encoding="utf-8")
     print(f"Wrote concated output to {output_filename}")
-
-    # TODO: remove build feature. For both reduction of complexity and separation of duties.
-    if args.build:
-        # Alternative, use clang/clang++ as compiler
-        compiler = "g++" if lang_mode == "cpp" else "gcc"
-        exe_name = filebasename_without_ext(args.entry)
-
-        complproc = subprocess.run([compiler, output_filename, "-o", exe_name])
-        if complproc.returncode == 0:
-            print("Build succeeds")
-        else:
-            print("Build failed")
 
 
 if __name__ == "__main__":
