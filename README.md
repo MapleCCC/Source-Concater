@@ -11,7 +11,7 @@ No need to write obscure Makefile recipes anymore. Simply concatenate source fil
 
 No more bunch of linker errors to resolve.
 
-Currently only support C/C++ language. More to come in the future.
+*Currently only support C/C++ language*. More to come in the future.
 
 ## Installation
 
@@ -43,10 +43,12 @@ $ concat main.cpp -I include -S src
 
 $ concat --help
 '''
-usage: Automatically Concatenate C/C++ Source Files [-h] [--build] [--cpp]
+usage: Automatically Concatenate C/C++ Source Files [-h]
                                                     [-I [INCLUDE_DIR [INCLUDE_DIR ...]]]
                                                     [-S [SOURCE_DIR [SOURCE_DIR ...]]]
-                                                    [-o OUTPUT]
+                                                    [-o OUTPUT] [--format]
+                                                    [--format-style FORMAT_STYLE]
+                                                    [--format-fallback-style FORMAT_FALLBACK_STYLE]
                                                     entry
 
 positional arguments:
@@ -54,9 +56,6 @@ positional arguments:
 
 optional arguments:
   -h, --help            show this help message and exit
-  --build               Control whether to build the concatenated source file
-                        after concatenation
-  --cpp                 Specify language mode to be C++
   -I [INCLUDE_DIR [INCLUDE_DIR ...]], --include-dir [INCLUDE_DIR [INCLUDE_DIR ...]]
                         Sepcify search path for include headers. Can specify
                         multiple paths. Current working directory will be
@@ -67,6 +66,16 @@ optional arguments:
                         directory will be inserted before all paths.
   -o OUTPUT, --output OUTPUT
                         Specify output file name
+  --format              Whether to format concated code with clang-format
+  --format-style FORMAT_STYLE
+                        Specify the clang-format style. Default is `file`,
+                        which means first try to detect `.clang-format`
+                        configuration file under the same directory with the
+                        entry source file, and if not found, fall back to
+                        internal fall-back format style.
+  --format-fallback-style FORMAT_FALLBACK_STYLE
+                        Specify the clang-format fallback style. Default is a
+                        predefined value.
 '''
 ```
 
@@ -75,8 +84,69 @@ Optionally, use as module, progrmmatically
 ```python
 from concat import concat_source
 
-output = concat_source("main.lzw", include_dir="include", source_dir="src")
+output = concat_source("main.cpp", include_dir="include", source_dir="src")
 print(output)
+```
+
+## Example
+
+Suppose there are three files: `main.cpp`, `utils.h` and `utils.cpp`. The directory layout is:
+
+```
+.
+ |-src
+ | |-main.cpp
+ | |-utils.cpp
+ |-include
+ | |-utils.h
+```
+
+And the file contents are:
+
+```cpp
+// content of main.cpp
+#include <iostream>
+#include "utils.h"
+
+int main() {
+  std::cout << int2str(10) << std::endl;
+  return 0;
+}
+```
+
+```cpp
+// content of utils.h
+#include <string>
+
+std::string int2str(int);
+```
+
+```cpp
+// content of utils.cpp
+#include "utils.h"
+
+std::string int2str(int x) {
+  return "To Be Implemented";
+}
+```
+
+After executing command `concat src/main.cpp -I include -S src`, a concated new file `concated.cpp` is generated.
+
+```cpp
+// content of concated.cpp
+#include <iostream>
+#include <string>
+
+std::string int2str(int);
+
+int main() {
+    std::cout << int2str(10) << std::endl;
+    return 0;
+}
+
+std::string int2str(int x) {
+  return "To Be Implemented";
+}
 ```
 
 ## License
