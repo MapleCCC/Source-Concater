@@ -72,7 +72,7 @@ def remove_comments(content: str) -> str:
 
 def remove_include_non_std_lib_directive(content: str) -> str:
     new_lines = []
-    past = None
+    past = ""
     remove_blank_line_flag = False
     for line in content.splitlines():
         if re.match(INCLUDE_NON_STD_LIB_PATTERN, line):
@@ -95,7 +95,7 @@ def move_include_std_lib_directive_to_top(content: str) -> str:
     lines = content.splitlines()
     includes = set()
     body = []
-    past = None
+    past = ""
     remove_blank_line_flag = False
     for line in lines:
         if re.match(INCLUDE_STD_LIB_PATTERN, line):
