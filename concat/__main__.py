@@ -1,18 +1,18 @@
 #!/usr/bin/env python3
 
 import argparse
-from typing import List
 from pathlib import Path
+from typing import List
 
+from .config import DEFAULT_FORMAT_FALLBACK_STYLE, DEFAULT_FORMAT_STYLE
 from .extra_itertools import filtertrue
 from .extract_dependencies import get_dependencies_of_library, get_implem_from_header
 from .graph import CircularDependencyError, Graph
 from .process_c_source import (
     move_include_std_lib_directive_to_top,
-    remove_include_non_std_lib_directive,
     reformat_source,
+    remove_include_non_std_lib_directive,
 )
-from .config import DEFAULT_FORMAT_FALLBACK_STYLE, DEFAULT_FORMAT_STYLE
 
 
 # TODO: implement in more sane way. Reduce McCabe complexity. Consider use queue.
