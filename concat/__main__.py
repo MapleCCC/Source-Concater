@@ -77,6 +77,11 @@ def add_arguments(parser: argparse.ArgumentParser) -> None:
         help="Sepcify search path for source files corresponding to headers. Can specify multiple paths. Current working directory will be inserted before all paths.",
     )
     parser.add_argument("-o", "--output", help="Specify output file name")
+    parser.add_argument(
+        "--format", help="Whether to format concated code with clang-format"
+    )
+    parser.add_argument("--format-style", help="Specify the clang-format style")
+    parser.add_argument("--disable-move-sys-header-atop")
     # parser.add_argument("--mode")
     # parser.add_argument("-v", "--verbose")
     # parser.add_argument("-q", "--quiet")
@@ -106,6 +111,38 @@ def main():
         output_filename = "concated.cpp" if lang_mode == "cpp" else "concated.c"
 
     output = concat_source(entry, include_dir, source_dir)
+
+    # TODO: extract formatting logic to standalone function
+    # TODO: move some predefined literals to config.py
+    formatter = "clang-format"
+    format_style = args.format_style
+    if not format_style:
+        format_style = "file"
+    # TODO: break into multi-line string
+    fallback_format_style = (
+        "{BasedOnStyle: Google, "
+        + "IndentWidth: 4, "
+        + "AlwaysBreakAfterReturnType: TopLevelDefinitions, "
+        + "SortIncludes: true, "
+        + "IncludeBlocks: Regroup}"
+    )
+    output = subprocess.run(
+        [
+            formatter,
+            # Specify assume-filename so clang-format can properly detect language
+            "-assume-filename",
+            output_filename,
+            "-fallback-style",
+            fallback_format_style,
+            "-style",
+            format_style,
+        ],
+        input=output,
+        text=True,
+        encoding="utf-8",
+        capture_output=True,
+        check=True,
+    ).stdout
 
     Path(output_filename).write_text(output, encoding="utf-8")
     print(f"Wrote concated output to {output_filename}")
