@@ -2,7 +2,7 @@ import re
 from pathlib import Path
 from typing import List, Optional, Set
 
-from .constants import INCLUDE_NON_STD_LIB_PATTERN, IS_HEADER_FILE
+from .constants import INCLUDE_NON_SYS_HEADER_PATTERN, IS_HEADER_FILE
 from .process_c_source import dummify_string_literals, remove_comments
 
 
@@ -39,7 +39,7 @@ def extract_dependencies_of_file(filepath: Path, include_dir: List[Path]) -> Set
     content = remove_comments(content)
     # FIXME
     # content = dummyfy_string_literals(content)
-    matches = re.findall(INCLUDE_NON_STD_LIB_PATTERN, content)
+    matches = re.findall(INCLUDE_NON_SYS_HEADER_PATTERN, content)
     deps = set()
     for match in matches:
         abspath = seek_file(match, include_dir)

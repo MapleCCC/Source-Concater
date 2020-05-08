@@ -4,7 +4,7 @@ import subprocess
 from subprocess import CalledProcessError
 
 from .config import DEFAULT_FORMATTER
-from .constants import INCLUDE_NON_STD_LIB_PATTERN, INCLUDE_STD_LIB_PATTERN
+from .constants import INCLUDE_NON_SYS_HEADER_PATTERN, INCLUDE_SYS_HEADER_PATTERN
 
 
 def reformat_source(
@@ -70,12 +70,12 @@ def remove_comments(content: str) -> str:
     return remove_multi_line_comments(remove_single_line_comments(content))
 
 
-def remove_include_non_std_lib_directive(content: str) -> str:
+def remove_include_non_sys_header_directive(content: str) -> str:
     new_lines = []
     past = ""
     remove_blank_line_flag = False
     for line in content.splitlines():
-        if re.match(INCLUDE_NON_STD_LIB_PATTERN, line):
+        if re.match(INCLUDE_NON_SYS_HEADER_PATTERN, line):
             if past == "":
                 remove_blank_line_flag = True
         elif line == "":
@@ -92,14 +92,14 @@ def remove_include_non_std_lib_directive(content: str) -> str:
 
 
 # TODO: sort includes, and separate includes according to categories. Refer to clang-format for example.
-def move_include_std_lib_directive_to_top(content: str) -> str:
+def move_include_sys_header_directive_to_top(content: str) -> str:
     lines = content.splitlines()
     includes = set()
     body = []
     past = ""
     remove_blank_line_flag = False
     for line in lines:
-        if re.match(INCLUDE_STD_LIB_PATTERN, line):
+        if re.match(INCLUDE_SYS_HEADER_PATTERN, line):
             includes.add(line)
             if past == "":
                 remove_blank_line_flag = True

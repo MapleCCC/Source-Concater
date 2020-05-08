@@ -9,9 +9,9 @@ from .extra_itertools import filtertrue
 from .extract_dependencies import get_dependencies_of_library, get_implem_from_header
 from .graph import Graph
 from .process_c_source import (
-    move_include_std_lib_directive_to_top,
+    move_include_sys_header_directive_to_top,
     reformat_source,
-    remove_include_non_std_lib_directive,
+    remove_include_non_sys_header_directive,
 )
 
 
@@ -50,8 +50,8 @@ def concat_source(entry: Path, include_dir: List[Path], source_dir: List[Path]) 
     # Add file-end newline to be POSIX-compatible
     if output and output[-1] != "\n":
         output += "\n"
-    output = remove_include_non_std_lib_directive(output)
-    output = move_include_std_lib_directive_to_top(output)
+    output = remove_include_non_sys_header_directive(output)
+    output = move_include_sys_header_directive_to_top(output)
 
     return output
 
