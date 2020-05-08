@@ -39,24 +39,41 @@ def remove_comments(content: str) -> str:
     return remove_multi_line_comments(remove_single_line_comments(content))
 
 
-# TODO: also remove trailing blank lines
 def remove_include_non_std_lib_directive(content: str) -> str:
-    return "\n".join(
-        line
-        for line in content.splitlines()
-        if not re.match(INCLUDE_NON_STD_LIB_PATTERN, line)
-    )
+    new_lines = []
+    past = None
+    remove_blank_line_flag = False
+    for line in content.splitlines():
+        if re.match(INCLUDE_NON_STD_LIB_PATTERN, line):
+            if past == "":
+                remove_blank_line_flag = True
+        elif remove_blank_line_flag:
+            if line == "":
+                pass
+            else:
+                remove_blank_line_flag = False
+                new_lines.append(line)
+        past = line
+    return "\n".join(new_lines)
 
 
-# TODO: also remove trailing blank lines
 # TODO: sort includes, and separate includes according to categories. Refer to clang-format for example.
 def move_include_std_lib_directive_to_top(content: str) -> str:
     lines = content.splitlines()
     includes = set()
     body = []
+    past = None
+    remove_blank_line_flag = False
     for line in lines:
         if re.match(INCLUDE_STD_LIB_PATTERN, line):
             includes.add(line)
-        else:
-            body.append(line)
+            if past == "":
+                remove_blank_line_flag = True
+        elif remove_blank_line_flag:
+            if line == "":
+                pass
+            else:
+                remove_blank_line_flag = False
+                body.append(line)
+        past = line
     return "\n".join(sorted(includes) + [""] + body)
