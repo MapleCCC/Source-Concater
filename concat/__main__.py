@@ -78,6 +78,7 @@ def add_arguments(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("-o", "--output", help="Specify output file name")
     parser.add_argument(
         "--format",
+        action="store_true",
         default=False,
         help="Whether to format concated code with clang-format",
     )
