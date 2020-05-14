@@ -9,7 +9,8 @@ setuptools.setup(
     name="Source Code Concater",
     author="MapleCCC",
     author_email="littlelittlemaple@gmail.com",
-    description="...",
+    # TODO break long str literal to multiline. Read that mother fucker PEP.
+    description="A Python script to automatically search for dependent source files, and concatenate multiple source files together into one unified source file.",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/MapleCCC/Source-Concater",

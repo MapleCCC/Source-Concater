@@ -15,7 +15,6 @@ from .process_c_source import (
 )
 
 
-# TODO: implement in more sane way. Reduce McCabe complexity. Consider use queue.
 def generate_graph(
     entry: Path, include_dir: List[Path], source_dir: List[Path]
 ) -> Graph:

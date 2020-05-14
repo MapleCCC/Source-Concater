@@ -5,32 +5,33 @@
 
 ## Introduction
 
-A Python script to automatically search for dependent source files and concatenate multiple source files together into one unified source file. It's useful when you are fed up with writing hard-to-remember Makefile syntax, and resolving all kinds of cryptic linker errors.
+A Python script to automatically search for dependent source files, and concatenate multiple source files together into one unified source file. It's useful when you are fed up with writing hard-to-remember Makefile syntax, and resolving all kinds of cryptic linker errors.
 
 No need to write obscure Makefile recipes anymore. Simply concatenate source files and compile the single output file is all. Sweet and straighforward. Just one click.
 
 No more bunch of linker errors to resolve.
 
-*Currently only support C/C++ language*. More to come in the future.
+**Currently only support C/C++ language**. More to come in the future.
 
 ## Installation
 
 Prerequisites: Python>=3.6, [Git](https://git-scm.com/), [pip](https://pip.pypa.io/en/stable/).
 
+One-liner installation recipe:
+
 ```bash
-$ git clone https://github.com/MapleCCC/Source-Concater.git
+$ python -m pip install git+https://github.com/MapleCCC/Source-Concater.git
+```
 
-$ cd Source-Concater
+If editable mode installation is preferred:
 
+```bash
 # You can optionally create a virtual environment for isolation purpose
 $ python -m virtualenv .venv
 $ source .venv/Scripts/activate
 
-# Install requirements
-$ python -m pip install -r requirements.txt
-
 # Install in editable mode
-$ python -m pip install -e .  # Mind the dot at the end
+$ python -m pip install -e git+https://github.com/MapleCCC/Source-Concater.git
 ```
 
 ## Usage
