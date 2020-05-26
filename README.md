@@ -80,7 +80,7 @@ optional arguments:
 '''
 ```
 
-Optionally, use as module, progrmmatically
+Optionally, use as module, programmatically
 
 ```python
 from concat import concat_source

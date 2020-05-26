@@ -6,7 +6,7 @@ all:
 
 # TODO: Automate testing. Setup pytest workflow
 test:
-	python -m concat test/A.c
+	cd test && concat A.c >/dev/null && diff example.c concated.c
 
 check-unused-imports:
 	find ${SRC_DIR} -type f -name "*.py" | xargs pylint --disable=all --enable=W0611

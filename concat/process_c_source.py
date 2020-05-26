@@ -67,7 +67,9 @@ def remove_comments(content: str) -> str:
     def remove_multi_line_comments(content: str) -> str:
         raise NotImplementedError
 
-    return remove_multi_line_comments(remove_single_line_comments(content))
+    # FIXME
+    # return remove_multi_line_comments(remove_single_line_comments(content))
+    return remove_single_line_comments(content)
 
 
 def remove_include_non_sys_header_directive(content: str) -> str:
