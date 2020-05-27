@@ -126,7 +126,11 @@ def main():
             output, args.format_style, args.format_fallback_style, output_filename
         )
 
-    Path(output_filename).write_text(output, encoding="utf-8")
+    out_file = Path(output_filename)
+    if not out_file.exists():
+        out_file.parent.mkdir(parents=True, exist_ok=True)
+        out_file.touch()
+    out_file.write_text(output, encoding="utf-8")
     print(f"Wrote concated output to {output_filename}")
 
 
