@@ -24,4 +24,7 @@ lint:
 todo:
 	rg TODO
 
-.PHONY: all test check-unused-imports cui reformat lint todo
+fixme:
+	rg FIXME
+
+.PHONY: all test check-unused-imports cui reformat lint todo fixme
