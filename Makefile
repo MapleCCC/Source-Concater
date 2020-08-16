@@ -15,7 +15,7 @@ check-unused-imports:
 cui: check-unused-imports
 
 reformat:
-	find ${SRC_DIR} -type f -name "*.py" | xargs isort
+	isort --apply
 	black .
 
 lint:
