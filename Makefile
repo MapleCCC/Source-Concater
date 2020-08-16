@@ -15,7 +15,7 @@ check-unused-imports:
 cui: check-unused-imports
 
 reformat:
-	isort --apply
+	isort .
 	black .
 
 lint:
