@@ -152,6 +152,4 @@ std::string int2str(int x) {
 
 ## License
 
-[WTFPL 2.0](./LICENSE)
-
-[![WTFPL](http://www.wtfpl.net/wp-content/uploads/2012/12/wtfpl-badge-1.png)](http://www.wtfpl.net/)
+[MIT](/LICENSE)
