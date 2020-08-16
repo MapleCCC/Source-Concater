@@ -22,9 +22,6 @@ lint:
 	find ${TEST_DIR} -type f -name "*.py" | xargs pylint
 
 todo:
-	rg TODO
+	rg "# TODO|# FIXME" --glob !Makefile
 
-fixme:
-	rg FIXME
-
-.PHONY: all test check-unused-imports cui reformat lint todo fixme
+.PHONY: all test check-unused-imports cui reformat lint todo

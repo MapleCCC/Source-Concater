@@ -94,7 +94,7 @@ def add_arguments(parser: argparse.ArgumentParser) -> None:
     # parser.add_argument("--dump-makefile")
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser("Automatically Concatenate C/C++ Source Files")
     add_arguments(parser)
     args = parser.parse_args()

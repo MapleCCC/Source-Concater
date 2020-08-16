@@ -11,6 +11,7 @@
 - Automate testing. Setup pytest workflow.
 - Add support for more language.
 - Use some pre-existed library to detect programming language (with some confidence). Refer to the chardet library.
+- Use click or fire to replace argparse.
 
 ## Done
 
