@@ -22,6 +22,6 @@ lint:
 	find ${TEST_DIR} -type f -name "*.py" | xargs pylint
 
 todo:
-	rg -ri TODO
+	rg TODO
 
 .PHONY: all test check-unused-imports cui reformat lint todo
